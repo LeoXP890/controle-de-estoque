@@ -7,7 +7,9 @@
           <router-link to="/dashboard">Dashboard</router-link>
           <router-link to="/produtos">Produtos</router-link>
           <router-link to="/categorias">Categorias</router-link>
-          <span>{{ username }} ({{ role }})</span>
+          <router-link v-if="role === 'ADMIN'" to="/usuarios">Usuários</router-link>
+          <router-link to="/perfil" class="user-link">{{ username }}</router-link>
+          <span>({{ role }})</span>
           <button class="secondary" @click="logout">Sair</button>
         </nav>
       </div>
