@@ -1,44 +1,25 @@
 <template>
   <main class="container">
-    <h2>Gerenciamento de Categorias</h2>
+    <div class="page-header">
+      <div>
+        <h2>Gerenciamento de Categorias</h2>
+        <p>Organize suas categorias e mantenha o cadastro atualizado para facilitar o controle dos produtos.</p>
+      </div>
+    </div>
 
-    <section class="card" v-if="admin" style="margin-bottom: 16px">
-      <h3>{{ editando ? 'Editar categoria' : 'Nova categoria' }}</h3>
-      <form @submit.prevent="salvar" class="row" style="flex-direction: column">
-        <input v-model="form.nome" placeholder="Nome" required />
-        <textarea v-model="form.descricao" placeholder="Descrição" required></textarea>
-        <div class="row">
-          <button>{{ editando ? 'Atualizar' : 'Criar' }}</button>
-          <button class="secondary" type="button" @click="limpar">Limpar</button>
-        </div>
-      </form>
-    </section>
+    <CategoryForm :admin="admin" :editando="false" :initialForm="form" @salvar="salvar" @limpar="limpar" />
 
-    <section class="card">
-      <table>
-        <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nome</th>
-          <th>Descrição</th>
-          <th v-if="admin">Ações</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr v-for="cat in categorias" :key="cat.id">
-          <td>{{ cat.id }}</td>
-          <td>{{ cat.nome }}</td>
-          <td>{{ cat.descricao }}</td>
-          <td v-if="admin">
-            <div class="row">
-              <button class="secondary" @click="prepararEdicao(cat)">Editar</button>
-              <button class="danger" @click="excluir(cat.id)">Excluir</button>
-            </div>
-          </td>
-        </tr>
-        </tbody>
-      </table>
-    </section>
+    <DataTable :columns="columns" :data="categorias" :showActions="admin" :selectedId="modalItemId" @edit="abrirEdicao" @delete="excluir" />
+
+    <Modal v-model="modalOpen" title="Editar categoria">
+      <CategoryForm
+        :admin="admin"
+        :editando="true"
+        :initialForm="modalForm"
+        @salvar="salvarEdicao"
+        @limpar="fecharModal"
+      />
+    </Modal>
   </main>
 </template>
 
@@ -46,29 +27,54 @@
 import { onMounted, reactive, ref } from 'vue'
 import api from '../services/api'
 import { isAdmin } from '../services/auth'
+import CategoryForm from '../components/CategoryForm.vue'
+import DataTable from '../components/DataTable.vue'
+import Modal from '../components/Modal.vue'
 
 const categorias = ref([])
 const admin = isAdmin()
-const editando = ref(false)
-const idEdicao = ref(null)
+const modalOpen = ref(false)
+const modalItemId = ref(null)
 
 const form = reactive({
   nome: '',
   descricao: ''
 })
 
+const modalForm = reactive({
+  nome: '',
+  descricao: ''
+})
+
+const columns = [
+  { key: 'id', label: 'ID' },
+  { key: 'nome', label: 'Nome' },
+  { key: 'descricao', label: 'Descrição' }
+]
+
 function limpar() {
   form.nome = ''
   form.descricao = ''
-  editando.value = false
-  idEdicao.value = null
 }
 
-function prepararEdicao(cat) {
-  form.nome = cat.nome
-  form.descricao = cat.descricao
-  editando.value = true
-  idEdicao.value = cat.id
+function abrirEdicao(cat) {
+  modalForm.nome = cat.nome
+  modalForm.descricao = cat.descricao
+  modalItemId.value = cat.id
+  modalOpen.value = true
+}
+
+function fecharModal() {
+  modalOpen.value = false
+  modalItemId.value = null
+  modalForm.nome = ''
+  modalForm.descricao = ''
+}
+
+async function salvarEdicao(formData) {
+  await api.put(`/categorias/${modalItemId.value}`, formData)
+  fecharModal()
+  await carregar()
 }
 
 async function carregar() {
@@ -76,12 +82,8 @@ async function carregar() {
   categorias.value = data
 }
 
-async function salvar() {
-  if (editando.value) {
-    await api.put(`/categorias/${idEdicao.value}`, form)
-  } else {
-    await api.post('/categorias', form)
-  }
+async function salvar(formData) {
+  await api.post('/categorias', formData)
   limpar()
   await carregar()
 }

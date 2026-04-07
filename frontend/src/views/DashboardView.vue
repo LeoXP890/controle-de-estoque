@@ -1,6 +1,12 @@
 <template>
   <main class="container">
-    <h2>Dashboard</h2>
+    <div class="page-header">
+      <div>
+        <h2>Dashboard</h2>
+        <p>Visão rápida do seu estoque e acesso direto às telas de produtos e categorias.</p>
+      </div>
+    </div>
+
     <div class="row">
       <section class="card" style="min-width: 220px">
         <h3>Total de Produtos</h3>
@@ -11,6 +17,7 @@
         <p style="font-size: 30px">{{ totalCategorias }}</p>
       </section>
     </div>
+
     <section class="card" style="margin-top: 16px">
       <h3>Navegação</h3>
       <p><router-link to="/produtos">Ir para produtos</router-link></p>

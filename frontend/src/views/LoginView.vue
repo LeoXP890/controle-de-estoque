@@ -1,17 +1,21 @@
 <template>
-  <main class="container" style="max-width: 450px; margin-top: 80px">
-    <section class="card">
-      <h2>Login</h2>
-      <p>Entre com seu usuário e senha.</p>
+  <main class="container">
+    <section class="card auth-card">
+      <div class="page-header">
+        <div>
+          <h2>Login</h2>
+          <p>Entre com seu usuário e senha para acessar o sistema.</p>
+        </div>
+      </div>
 
-      <form @submit.prevent="fazerLogin" class="row" style="flex-direction: column">
+      <form @submit.prevent="fazerLogin" class="row column">
         <input v-model="form.username" type="text" placeholder="Usuário" required />
         <input v-model="form.password" type="password" placeholder="Senha" required />
         <button :disabled="carregando">Entrar</button>
       </form>
 
       <p class="error" v-if="erro">{{ erro }}</p>
-      <p style="margin-top: 12px; font-size: 13px">
+      <p style="margin-top: 16px; font-size: 13px; color: var(--muted);">
         Admin: <strong>admin/admin123</strong> | User: <strong>user/user123</strong>
       </p>
     </section>
